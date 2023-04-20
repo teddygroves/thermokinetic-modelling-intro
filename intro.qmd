@@ -1,0 +1,270 @@
+---
+title: Bayesian inference for realistic kinetic models of cell metabolism  
+subtitle: What we want to do and why it is tricky
+bibliography: bibliography.bib
+reference-location: margin
+toc: true
+format:
+  html:
+    standalone: true
+  ipynb:
+    ipynb-output: all
+---
+
+This document explains how our group, Quantitative Modelling of Cell
+Metabolism, thinks about modelling networks of metabolic reactions.
+
+# Our modelling approach
+
+Our aim is to synthesise information from the following sources:
+
+* Quantitative measurements of the cell's metabolites, enzymes and fluxes
+* A thermokinetic model that describes how each reaction in the metabolic
+  network works in terms of some unknown parameters.
+* Quantitative information about the parameters of the thermokinetic model.
+
+We believe that taking all of this information into account at the same time
+will yield insights that can be used to guide the design of new cell strains.
+
+By treating this problem as a case of Bayesian statistical inference, we can
+conveniently partition these information sources into separate sub-models:
+
+* A measurement model or 'likelihood' describing what is learned from any
+  measurement.
+* A generative model, encompassing our thermokinetic model, that describes how
+  measureable quantities are generated from underlying unobserved parameters.
+* A prior model describing what is known about the unobserved parameters.
+
+The rest of this section sets out how we flesh out these sub-models, starting
+with the generative model as it is by far the most interesting.
+
+## Our generative model {#sec-generative-mo
+### Thermokinetic models in general
+
+A thermokinetic model describes the rates (usually referred to as 'fluxes') of
+the chemical reactions in a metabolic network parametrically, in terms of the
+concentrations of the network's metabolites, some kinetic parameters describing
+the network's reactions, some thermodynamic parameters and some parameters
+describing the network's boundary conditions. @eq-thermokinetic-general
+therefore captures the general form of a thermokinetic model:^[In
+@eq-thermokinetic-general, the term $x$ represents a vector of metabolite
+concentrations, the term \theta represent parameter vectors, and $v$ is a
+vector of real numbers, one per reaction]
+
+$$
+  v = f_v(x, \theta) 
+$$ {#eq-thermokinetic-general}
+
+Thermokinetic models of cell metabolism are often contrasted with
+constraint-based models. Constraint-based models do not describe metabolic
+fluxes parametrically; instead they simply identify constraints that exclude
+certain flux values.
+
+Many thermokinetic models are possible, depending on how the modeller trades
+off detail against other factors such as computational feasibility, model
+identification and ease of curation. 
+
+One thing that almost all thermokinetic models have in common is the assumption
+that the stoichiometric coefficient---that is, the number of molecules created
+or destroyed---of every metabolite in every reaction is known and collected in
+a stoichiometric matrix $S$ with a row for each metabolite and a column for
+each reaction.
+
+### Our thermokinetic model
+
+The thermokinetic model that we chose decomposes into factors as shown in
+@eq-flux-decomposition. The full model is presented here for completeness and
+to illustrate the general nature of the equations that we use, but the details
+can safely be skipped over.
+
+$$
+  f_v(x, \theta) = Enzyme \cdot k_{cat} \cdot Reversibility \cdot Saturation \cdot Allostery \cdot Phosphorylation
+$$ {#eq-flux-decomposition}
+
+Each of the terms on the right hand side of @eq-flux-decomposition is a
+function of $x$ and $\theta$ representing a conceptually distinct aspect of how
+an enzyme-catalysed reaction works.
+
+The term $Enzyme$ is a vector of non-negative real numbers representing the
+concentration of the enzyme catalysing each reaction.
+
+The term $k_{cat}$ is a vector of non-negative real numbers representing the
+amount of flux carried per unit of saturated enzyme.
+
+The term $Reversibility$ is a vector of real numbers capturing the impact of
+thermodynamics on the reaction's flux, as shown in
+@eq-reversibility.^[@eq-reversibility is simplified a bit; the formulation we
+use in practice takes into account special cases where a reactions that
+consumes or produces water or is affected by membrane potential. See
+[here](https://github.com/biosustain/Maud/blob/b343c64979752700fff84a7b2d2e163d69060b34/src/maud/stan/functions.stan#L161)
+for the code that is actually used.]
+
+$$
+\begin{aligned}
+  Reversibility &= 1 - \exp(\frac{\Delta_{r}G' + RT \cdot S^T \ln(x)}{RT}) \\
+  \Delta_{r}G' &= S^{T}\Delta_{f}G' 
+\end{aligned}
+$${#eq-reversibility}
+
+In @eq-reversibility the term $T$ represents the temperature in Kelvin, $R$ is
+the gas constant, $\Delta_rG'$ is a vector representing the Gibbs free energy
+change of each reaction in standard conditions and $\Delta_fG'$ is a vector
+representing the standard condition Gibbs free energy change of each
+metabolite's formation reaction, or in other words each metabolite's 'formation
+energy'.
+
+Note that the thermodynamic effect on each reaction is derived from metabolite
+formation energies. This formulation is helpful because, provided that all
+reactions' rates are calculated from the same formation energies, they are
+guaranteed to be thermodynamically consistent.
+
+The term $Saturation$ in equation @eq-flux-decomposition is a vector of
+non-negative real numbers representing, for each reaction, the fraction of
+enzyme that is saturated, i.e. bound to one of the reaction's substrates. To
+describe saturation we use @eq-saturation, which is taken from
+@liebermeisterModularRateLaws2010.
+
+$$
+\begin{align}
+  Saturation_r &= a \cdot \text{free enzyme ratio} \\
+             a &= \prod_{\text{s substrate}}\frac{x_s}{km_{rs}} \\
+\text{free enzyme ratio} &= \begin{cases} 
+                  \prod_{\text{s sustrate}} (\frac{x_s}{km_{rs}})^{S_sr} 
+                  + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}} & r\text{ irreversible} \\
+                  -1 
+                  + \prod_{\text{s sustrate}} (\frac{x_s}{km_{rs}})^{S_sr} 
+                  + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}}
+                  + \prod_{\text{p product}} (\frac{x_p}{km_{rp}})^{S_pr}  & r\text{ reversible}
+                  \end{cases}
+\end{align}
+$${#eq-saturation}
+
+The term $Allostery$ in @eq-flux-decomposition is a vector of
+non-negative numbers describing the effect of allosteric regulation on each
+reaction. Allosteric regulation happens when binding to a certain molecule
+changes an enzyme's shape in a way that changes its catalytic behaviour. We use
+@eq-allostery, originally from @popovaGeneralizationModelMonod1975, to describe
+this phenomenon.
+
+$$
+\begin{align}
+  Allostery_r &= \frac{1}{1 + tc_r + (\text{free enzyme ratio}_r \cdot \frac{Qtense}{Qrelaxed})^{subunits}} \\
+       Qtense &= 1 + \sum_{\text{i inhibitor}} \frac{x_i}{dc_{ri}} \\
+     Qrelaxed &= 1 + \sum_{\text{a activator}} \frac{x_a}{dc_{ra}}
+\end{align}
+$${#eq-allostery}
+
+Finally, the term $Phosphorylation$ in @eq-flux-decomposition captures an
+important effect whereby enzyme activity is altered due to a coupled process of
+phosphorylation and dephosphorylation.
+
+$$
+\begin{align}
+Phosphorylation_r &= (\frac{\beta}{\alpha + \beta})^{subunits} \\
+          \alpha &= \sum_{\text{p phosphoylator}} kcatp_p \cdot concp_p \\
+           \beta &= \sum_{\text{p dephosphoylator}} kcatd_d \cdot concd_d \\
+\end{align}
+$${#eq-phosphorylation}
+
+### Steady state assumption
+
+As well as assuming that the fluxes in our metabolic network will behave as our
+thermokinetic model expects, we also assume that the system was measured in a
+steady state, so that every non-boundary metabolite's concentration was not
+changing. This assumption is represented mathematically in @eq-steady.
+
+$$
+S\cdot f_v(x, \theta) = 0
+$${#eq-steady}
+
+The steady state assumption removes degrees of freedom equal to the rank of $S$
+from our model, so that $v$ is constrained to lie in the right null space of S.
+Usually, given $\theta$ it is possible can solve @eq-steady to find a steady
+state metabolite concentration $x_{steady}$. 
+
+### Our full generative model
+
+Our full generative model starts with a parameter vector $\theta$. It then
+calculates the steady state metabolite concentration vector $x_{steady}$ by
+solving $@eq-steady$.^[Note that in practice we do not solve @eq-steady
+directly but instead use ODE simulation - see section
+@sec-solving-the-steady-state-problem for details] Metabolite concentrations
+are now available and can be compared with measurements. To find flux values to
+compare with measurements we simply calculate $v_{steady}=f_v(x_{steady},
+\theta)$.
+
+## Measurement model {#sec-measurement-model}
+
+For measurements of metabolite and enzyme concentrations we use independent
+lognormal regression models:
+
+$$
+\begin{align}
+  y_{x} &\sim LN(\ln(x_{steady}), \sigma_x) \\
+  y_{enzyme} &\sim LN(\ln(Enzyme), \sigma_{enzyme})
+\end{align}
+$${#eq-conc-measurement-model}
+
+For measurements of steady state fluxes we use independent linear regression
+models:
+
+$$
+\begin{equation}
+  y_{v} \sim N(f_v(x_{steady}, \theta), \sigma_v) 
+\end{equation}
+$${#eq-conc-measurement-model}
+
+We ensure that flux measurements correspond to the flux modes of the measured
+network, so that the same pathway is never measured twice. See chapter 10 of
+@palssonSystemsBiologyConstraintbased2015, entitled "the left null space" for a
+discussion of this issue.
+
+We assume that the measurement errors $\sigma_x$, $\sigma_{enzyme}$ and
+$\sigma_v$ are known for each measurement.
+
+These measurements $y_x$ and $y_{enzyme}$ are typically derived from
+quantitative metabolomics and proteomics experiments. Our choice of measurement
+model for these measurements is imperfect in at least these ways:
+
+* The measurement error is not known, and is in fact very difficult to
+  estimate.
+* The measurements are not independent, as they are typically far more reliable
+  as to differences---both between metabolites in the same experiment and
+  between the same metabolite in different experiments---than they are as to
+  absolute concentrations.
+
+These problems also apply to flux measurements, but there is another issue:
+flux meausrements are derived from k
+
+## Prior model {#sec-prior-model}
+
+For kinetic parameters including $km$, $kcat$, $ki$ and parameters governing
+regulation we use independent informative lognormal prior distributions based
+on information gleaned from online databases, literature searches and
+intuition.
+
+For boundary conditions including unbalanced metabolite concentrations,
+boundary fluxes and enzyme concentrations we use informative independent
+lognormal or normal prior distributions depending on the natural sign
+constraints of the variable (for example fluxes are not constrained to be
+positive, so in this case we use independent normal prior distributions). We
+sometimes use measurements to determine informative prior distributions for
+boundary conditions.
+
+For thermodynamic parameters---i.e. metabolite formation energies---we use an
+informative multivariate normal distribution that is derived from equilibrium
+constant measurements reported in the NIST TECRDB
+@goldbergThermodynamicsEnzymecatalyzedReactions2004. The distribution is
+calculated using the component contribution method
+@noorConsistentEstimationGibbs2013 as implemented in the software equilibrator
+@beberEQuilibratorPlatformEstimation2021. In future we would like to use our
+own software to generate these priors.
+
+## Implementation {#sec-implementation}
+
+### Posterior sampling {#sec-posterior-sampling}
+
+### Solving the steady state problem {#sec-solving-the-steady-state-problem}
+
+### Software {#sec-software}
+
