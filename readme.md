@@ -12,11 +12,11 @@ To create an html, pdf and docx version of the document, first install quarto
 then run this command:
 
 ```sh
-quarto render qmcm-thermokinetic-modelling.qmd
+quarto render thermokinetic-modelling-intro.qmd
 ```
 
 To create a live preview, run this command:
 
 ```sh
-quarto preview qmcm-thermokinetic-modelling.qmd
+quarto preview thermokinetic-modelling-intro.qmd
 ```
