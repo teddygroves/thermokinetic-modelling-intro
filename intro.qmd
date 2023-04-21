@@ -1,18 +1,20 @@
 ---
-title: Bayesian inference for realistic kinetic models of cell metabolism  
-subtitle: What we want to do and why it is tricky
+title: Bayesian inference for realistic thermokinetic models of cell metabolism  
+subtitle: What we want to do and where we need help
 bibliography: bibliography.bib
 reference-location: margin
 toc: true
 format:
   html:
     standalone: true
-  ipynb:
-    ipynb-output: all
+  pdf: default
+  docx: default
 ---
 
 This document explains how our group, Quantitative Modelling of Cell
-Metabolism, thinks about modelling networks of metabolic reactions.
+Metabolism, thinks about modelling networks of metabolic reactions. It also
+explains where we think our approach could be improved and what kind of help we
+need in order to carry out these improvements.
 
 # Our modelling approach
 
@@ -38,8 +40,9 @@ conveniently partition these information sources into separate sub-models:
 The rest of this section sets out how we flesh out these sub-models, starting
 with the generative model as it is by far the most interesting.
 
-## Our generative model {#sec-generative-mo
-### Thermokinetic models in general
+## Our generative model {#sec-generative-model}
+
+### Thermokinetic models in general {#sec-thermokinetic-models-in-general}
 
 A thermokinetic model describes the rates (usually referred to as 'fluxes') of
 the chemical reactions in a metabolic network parametrically, in terms of the
@@ -53,7 +56,7 @@ vector of real numbers, one per reaction]
 
 $$
   v = f_v(x, \theta) 
-$$ {#eq-thermokinetic-general}
+$${#eq-thermokinetic-general}
 
 Thermokinetic models of cell metabolism are often contrasted with
 constraint-based models. Constraint-based models do not describe metabolic
@@ -70,7 +73,7 @@ or destroyed---of every metabolite in every reaction is known and collected in
 a stoichiometric matrix $S$ with a row for each metabolite and a column for
 each reaction.
 
-### Our thermokinetic model
+### Our thermokinetic model {#sec-our-thermokinetic-model}
 
 The thermokinetic model that we chose decomposes into factors as shown in
 @eq-flux-decomposition. The full model is presented here for completeness and
@@ -79,7 +82,7 @@ can safely be skipped over.
 
 $$
   f_v(x, \theta) = Enzyme \cdot k_{cat} \cdot Reversibility \cdot Saturation \cdot Allostery \cdot Phosphorylation
-$$ {#eq-flux-decomposition}
+$${#eq-flux-decomposition}
 
 Each of the terms on the right hand side of @eq-flux-decomposition is a
 function of $x$ and $\theta$ representing a conceptually distinct aspect of how
@@ -125,7 +128,7 @@ describe saturation we use @eq-saturation, which is taken from
 @liebermeisterModularRateLaws2010.
 
 $$
-\begin{align}
+\begin{aligned}
   Saturation_r &= a \cdot \text{free enzyme ratio} \\
              a &= \prod_{\text{s substrate}}\frac{x_s}{km_{rs}} \\
 \text{free enzyme ratio} &= \begin{cases} 
@@ -136,7 +139,7 @@ $$
                   + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}}
                   + \prod_{\text{p product}} (\frac{x_p}{km_{rp}})^{S_pr}  & r\text{ reversible}
                   \end{cases}
-\end{align}
+\end{aligned}
 $${#eq-saturation}
 
 The term $Allostery$ in @eq-flux-decomposition is a vector of
@@ -147,11 +150,11 @@ changes an enzyme's shape in a way that changes its catalytic behaviour. We use
 this phenomenon.
 
 $$
-\begin{align}
-  Allostery_r &= \frac{1}{1 + tc_r + (\text{free enzyme ratio}_r \cdot \frac{Qtense}{Qrelaxed})^{subunits}} \\
+\begin{aligned}
+  Allostery_r &= \frac{1}{1 + tc_r \cdot (\text{free enzyme ratio}_r \cdot \frac{Qtense}{Qrelaxed})^{subunits}} \\
        Qtense &= 1 + \sum_{\text{i inhibitor}} \frac{x_i}{dc_{ri}} \\
      Qrelaxed &= 1 + \sum_{\text{a activator}} \frac{x_a}{dc_{ra}}
-\end{align}
+\end{aligned}
 $${#eq-allostery}
 
 Finally, the term $Phosphorylation$ in @eq-flux-decomposition captures an
@@ -159,14 +162,14 @@ important effect whereby enzyme activity is altered due to a coupled process of
 phosphorylation and dephosphorylation.
 
 $$
-\begin{align}
+\begin{aligned}
 Phosphorylation_r &= (\frac{\beta}{\alpha + \beta})^{subunits} \\
-          \alpha &= \sum_{\text{p phosphoylator}} kcatp_p \cdot concp_p \\
-           \beta &= \sum_{\text{p dephosphoylator}} kcatd_d \cdot concd_d \\
-\end{align}
+          \alpha &= \sum_{\text{p phosphoylator}} kcat_{p} \cdot concp_p \\
+           \beta &= \sum_{\text{p dephosphoylator}} kcat_{d} \cdot concd_d \\
+\end{aligned}
 $${#eq-phosphorylation}
 
-### Steady state assumption
+### Steady state assumption {#sec-}
 
 As well as assuming that the fluxes in our metabolic network will behave as our
 thermokinetic model expects, we also assume that the system was measured in a
@@ -182,10 +185,10 @@ from our model, so that $v$ is constrained to lie in the right null space of S.
 Usually, given $\theta$ it is possible can solve @eq-steady to find a steady
 state metabolite concentration $x_{steady}$. 
 
-### Our full generative model
+### Our full generative model {#sec-our-full-generative-model}
 
 Our full generative model starts with a parameter vector $\theta$. It then
-calculates the steady state metabolite concentration vector $x_{steady}$ by
+calculates the steady state metabolite concentration vector $x_steady$ by
 solving $@eq-steady$.^[Note that in practice we do not solve @eq-steady
 directly but instead use ODE simulation - see section
 @sec-solving-the-steady-state-problem for details] Metabolite concentrations
@@ -199,20 +202,18 @@ For measurements of metabolite and enzyme concentrations we use independent
 lognormal regression models:
 
 $$
-\begin{align}
+\begin{aligned}
   y_{x} &\sim LN(\ln(x_{steady}), \sigma_x) \\
   y_{enzyme} &\sim LN(\ln(Enzyme), \sigma_{enzyme})
-\end{align}
+\end{aligned}
 $${#eq-conc-measurement-model}
 
 For measurements of steady state fluxes we use independent linear regression
 models:
 
-$$
 \begin{equation}
   y_{v} \sim N(f_v(x_{steady}, \theta), \sigma_v) 
-\end{equation}
-$${#eq-conc-measurement-model}
+\end{equation}{#eq-conc-measurement-model}
 
 We ensure that flux measurements correspond to the flux modes of the measured
 network, so that the same pathway is never measured twice. See chapter 10 of
@@ -262,9 +263,213 @@ own software to generate these priors.
 
 ## Implementation {#sec-implementation}
 
+Full details of how we implement Bayesian thermokinetic modelling can be found
+in our software package [Maud](https://github.com/biosustain/Maud).
+
+### Input specification {#sec-input-specification}
+
+The required input for our Bayesian thermokinetic model is as follows:
+
+* A qualititative specification of the thermokinetic model, including reaction
+  stoichiometries, enzyme and compartment mappings and regulations.
+* Records of experiments including measurements (and their errors) and
+  enzyme knockouts.
+* Information about parameters including priors and initial values. In future
+  it will also be possible to fix a parameter's value.
+* Configuration including MCMC hyperparameters, solver tolerances and units.
+
+We created a custom format with which these things can be specified in
+[toml](https://toml.io/en/) files. Maud can read these files, perform
+validation and represent them as Python objects.
+
 ### Posterior sampling {#sec-posterior-sampling}
+
+We carry out Bayesian inference by posterior sampling using adaptive
+Hamiltonian Monte Carlo as provided by [Stan](https://mc-stan.org/).
+
+To our knowledge this is the only viable approach. Realistic models have too
+many parameters for many Bayesian computation approaches, including rejection
+sampling, ABC, Metropolis-Hastings and Gibbs sampling, while a similar study
+@st.johnBayesianInferenceMetabolic2018 indicates that variational inference is
+unlikely to provide satisfactory approximations in this case.
+
+We believe that the non-linear, multi-parameter equations shown in
+@sec-our-thermokinetic-model create particular problems for MCMC sampling
+because they induce complex correlations in the posterior distribution.
+Consequently, although adaptive Hamiltonian Monte Carlo makes Bayesian
+inference for realistic thermokinetic models possible, many leapfrog steps are
+typically required per sample, as the sampler must traverse the posterior
+distribution in small steps in order to avoid discretisation errors.
 
 ### Solving the steady state problem {#sec-solving-the-steady-state-problem}
 
-### Software {#sec-software}
+As mentioned in @sec-our-full-generative-model, in our generative model
+steady state metabolite concentrations are calculated from parameter values by
+solving the steady state equation @eq-steady. Since adaptive Hamiltonian Monte
+Carlo requires gradients of the posterior distribution, it is also necessary to
+calculate sensitivities of the steady state problem solution with respect to
+all parameters.
 
+Our approach to this problem is to choose a starting concentration vector
+$x_{0}$ and a simulation time $t$, then find $x_t$ using numerical ODE
+integration. To verify whether $x_t$ is a steady state we then evaluate $S\cdot
+f_v(x_t, \theta)$ and check if the result is sufficiently close to zero.
+
+Stan provides an interface to the Sundials ODE solver CVODES, including
+gradient calculations.
+
+For the systems we have investigated, this method works better than solving the
+steady state problem using an algebra solver.
+
+### Analysis of results {#sec-analysis-of-results}
+
+After sampling is complete, Maud uses the Bayesian analysis library
+[arviz](https://python.arviz.org/en/0.14.0/index.html) to transform the results
+into an
+[InferenceData](https://python.arviz.org/en/0.14.0/api/inference_data.html)
+object and save it as a json file, along with a range of files containing debug
+information. These files can be used to validate the computation and to draw
+conclusions about the measured system.
+
+# Our problems
+
+There are several features we would like to add to Maud in order to model new
+phenomena, including promiscuous enzymes, varying compartment volumes and
+different enzyme mechanisms. In addition, as mentioned above our measurement
+models are somewhat unrealistic and should ideally be replaced with models that
+more accurately reflect the information contained in a multi-omics analysis,
+particularly in the case of data from 13C labelling experiments. There are also
+new features that would make the modelling process easier, including fixing
+arbitrary parameters values, automatically loading input data and adding more
+validation. We are pretty confident that we can incrementally add all these
+features within the current framework.
+
+However our biggest problems require more fundamental changes: we would like to
+fit larger networks faster, and we would like to guarantee that our models
+appropriately respect known conservation relationships.
+
+## Problem 1: speed {#sec-problem-1-speed}
+
+Due to speed constraints, the ballpark range for the largest systems we can
+practically model is around 15 reactions and state variables: see [the example
+maud input for the methionine
+cycle](https://github.com/biosustain/Maud/tree/master/src/maud/data/example_inputs/methionine)
+for an illustration. This is large enough that Maud can describe some
+non-trivial metabolic networks, but relatively small improvements would
+dramatically expand the range of applicability. To illustrate, it is possible
+to describe the important subsystem comprising glycolysis and pentose phosphate
+pathway in *E. coli* using about 20 reactions, and
+[`e_coli_core`](http://bigg.ucsd.edu/models/e_coli_core), the smallest model in
+the UCSD BIGG database, has 95 reactions.
+
+The main thing that limits Maud's speed is the need to solve the steady state
+problem many times. To illustrate, a typical run with 2000 iterations, each
+with 500 gradient evaluations requires the steady state problem to be solved
+1000000 times.
+
+## Problem 2: conservation relationships {#sec-problem-2-conservation-relationships}
+
+Conservation relationships exist when a network conserves the total abundance
+of a combination of metabolites. For example, central carbon metabolism does
+not change the total amount of the metabolites ATP, AMP and ADP, but only
+changes the distribution of the total pool among these three forms. In general
+any concentration vector $x$ must satsify a set of mass conservation equations
+
+\begin{equation}
+L\cdot vol(x) = a
+\end{equation}{#eq-conservation}
+
+where $L$ is the left null space of the stoichiometric matrix (i.e. a matrix
+satisfying $L\cdot S = 0$), $vol$ is a function that translates concentrations
+into abundances and $a$ is a vector of pool abundances.^[See chapter 10 ('The
+Left Null Space of S') of @palssonSystemsBiologyConstraintbased2015 for further
+discussion.]
+
+The practical importance of conservation relationships for our problem is that,
+in our current implementation, the vector $a$ is fixed by the starting
+metabolite concentration, which is effectively hard-coded^[To be precise the
+starting concentration for each metabolite is set before sampling as either the
+measured value if available or a default value]. If it is inappropriate---for
+example if due to insufficient total ATP, AMP and ADP a reaction cannot flow in
+the correct direction---there is no way for the model to correct for this. We
+therefore think there are cases where our implementation prevents a steady
+state from being found even though one exists.
+
+# Potential solutions {#sec-potential-solutions}
+
+
+## Hardware {#sec-hardware}
+
+We have not been able to improve Maud's performance dramatically by using high
+performance computers or by exploiting parallelism as the key bottlenecks---it
+is difficult to ensure steady state solving.
+
+## Compiler {#sec-compiler}
+
+Another possibility is to explore compiler optimisations as described
+[here](https://blog.mc-stan.org/2022/08/03/options-for-improving-stan-sampling-speed/).
+We have not had much success, though there is definitely room for further
+optimisation in this area.
+
+## ODE solver tolerances {#sec-ode-solver-tolerances}
+
+There is a dramatic change in speed depending on the chosen ODE solver
+tolerances. We have not been able to find a systematic way to choose these, so
+we let the user configure these per run.
+
+## Adjoint ODE solver {#sec-adjoint-ode-solver}
+
+Stan provides an interface to [the CVODE bdf solver with gradients calculated
+using adjoint sensitivity
+analysis](https://mc-stan.org/docs/2_31/stan-users-guide/adjoint-ode.html) (the
+default approach, which we use, instead calculates gradients by solving an
+augmented ODE system). We expected using this solver to lead to improved speed
+and tried to use it when it was released, but we were not able to achieve large
+improvements, and reliability was worse.
+
+## Algebra solver {#sec-algebra-solver}
+
+It is possible in principle to solve the steady state problem using an algebra
+solver rather than via our forward simulation method. We have not been able to
+make this approach work reliably as the available solvers require a good
+starting guess.
+
+## Starting concentration vector {#sec-starting-concentraion-vector}
+
+A clear problem with our approach to solving the steady state problem is that
+we use a bad starting metabolite concentration vector. There are several
+potential speed improvements from choosing the starting concentration with
+escalating potential for improvement (and difficulty):
+
+1. Find a better starting concentration vector before beginning MCMC and use
+   the better starting concentration vector the same way we use our current
+   one.
+2. Use the warmup MCMC iterations to improve the starting concentration vector,
+   then use the improved vector for the sampling iterations.
+3. Choose a new starting vector every MCMC iteration or every few iterations.
+4. Choose a new starting concentration vector programmatically on each gradient
+   evaluation based on current parameter values. 
+5. Choose a new starting concentration vector on each gradient evaluation based
+   on the result of the previous gradient evaluation.
+
+Option 1 could be achieved simply by substituting the code that chooses the
+starting concentration for a better alternative.
+
+Options 2 and 3 require running Stan multiple times with custom starting
+conditions. This isn't a huge challenge.
+
+Option 4 is easy in principle as it only requires writing some Stan code.
+However we don't know how to use the current parameter values to find a good
+starting concentration.
+
+Option 5 is difficult as it requires re-writing Stan's underlying C++ code.
+
+## DAE system {#sec-dae-system}
+
+We think the correct way to take into account conservation relationsips is to
+cast the steady state problem as a differential algebraic equation system.
+
+Stan provides an [interface to the Sundials IDAS DAE
+solver](https://mc-stan.org/docs/functions-reference/functions-dae-solver.html).
+
+# References

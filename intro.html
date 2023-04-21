@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Bayesian inference for realistic kinetic models of cell metabolism</title>
+<title>Bayesian inference for realistic thermokinetic models of cell metabolism</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -68,31 +68,48 @@ div.csl-indent {
   <ul>
   <li><a href="#our-modelling-approach" id="toc-our-modelling-approach" class="nav-link active" data-scroll-target="#our-modelling-approach">Our modelling approach</a>
   <ul class="collapse">
-  <li><a href="#our-generative-model-sec-generative-mo" id="toc-our-generative-model-sec-generative-mo" class="nav-link" data-scroll-target="#our-generative-model-sec-generative-mo">Our generative model {#sec-generative-mo</a>
+  <li><a href="#sec-generative-model" id="toc-sec-generative-model" class="nav-link" data-scroll-target="#sec-generative-model">Our generative model</a>
   <ul class="collapse">
-  <li><a href="#thermokinetic-models-in-general" id="toc-thermokinetic-models-in-general" class="nav-link" data-scroll-target="#thermokinetic-models-in-general">Thermokinetic models in general</a></li>
-  <li><a href="#our-thermokinetic-model" id="toc-our-thermokinetic-model" class="nav-link" data-scroll-target="#our-thermokinetic-model">Our thermokinetic model</a></li>
-  <li><a href="#steady-state-assumption" id="toc-steady-state-assumption" class="nav-link" data-scroll-target="#steady-state-assumption">Steady state assumption</a></li>
-  <li><a href="#our-full-generative-model" id="toc-our-full-generative-model" class="nav-link" data-scroll-target="#our-full-generative-model">Our full generative model</a></li>
+  <li><a href="#sec-thermokinetic-models-in-general" id="toc-sec-thermokinetic-models-in-general" class="nav-link" data-scroll-target="#sec-thermokinetic-models-in-general">Thermokinetic models in general</a></li>
+  <li><a href="#sec-our-thermokinetic-model" id="toc-sec-our-thermokinetic-model" class="nav-link" data-scroll-target="#sec-our-thermokinetic-model">Our thermokinetic model</a></li>
+  <li><a href="#sec-" id="toc-sec-" class="nav-link" data-scroll-target="#sec-">Steady state assumption</a></li>
+  <li><a href="#sec-our-full-generative-model" id="toc-sec-our-full-generative-model" class="nav-link" data-scroll-target="#sec-our-full-generative-model">Our full generative model</a></li>
   </ul></li>
   <li><a href="#sec-measurement-model" id="toc-sec-measurement-model" class="nav-link" data-scroll-target="#sec-measurement-model">Measurement model</a></li>
   <li><a href="#sec-prior-model" id="toc-sec-prior-model" class="nav-link" data-scroll-target="#sec-prior-model">Prior model</a></li>
   <li><a href="#sec-implementation" id="toc-sec-implementation" class="nav-link" data-scroll-target="#sec-implementation">Implementation</a>
   <ul class="collapse">
+  <li><a href="#sec-input-specification" id="toc-sec-input-specification" class="nav-link" data-scroll-target="#sec-input-specification">Input specification</a></li>
   <li><a href="#sec-posterior-sampling" id="toc-sec-posterior-sampling" class="nav-link" data-scroll-target="#sec-posterior-sampling">Posterior sampling</a></li>
   <li><a href="#sec-solving-the-steady-state-problem" id="toc-sec-solving-the-steady-state-problem" class="nav-link" data-scroll-target="#sec-solving-the-steady-state-problem">Solving the steady state problem</a></li>
-  <li><a href="#sec-software" id="toc-sec-software" class="nav-link" data-scroll-target="#sec-software">Software</a></li>
+  <li><a href="#sec-analysis-of-results" id="toc-sec-analysis-of-results" class="nav-link" data-scroll-target="#sec-analysis-of-results">Analysis of results</a></li>
   </ul></li>
   </ul></li>
+  <li><a href="#our-problems" id="toc-our-problems" class="nav-link" data-scroll-target="#our-problems">Our problems</a>
+  <ul class="collapse">
+  <li><a href="#sec-problem-1-speed" id="toc-sec-problem-1-speed" class="nav-link" data-scroll-target="#sec-problem-1-speed">Problem 1: speed</a></li>
+  <li><a href="#sec-problem-2-conservation-relationships" id="toc-sec-problem-2-conservation-relationships" class="nav-link" data-scroll-target="#sec-problem-2-conservation-relationships">Problem 2: conservation relationships</a></li>
+  </ul></li>
+  <li><a href="#sec-potential-solutions" id="toc-sec-potential-solutions" class="nav-link" data-scroll-target="#sec-potential-solutions">Potential solutions</a>
+  <ul class="collapse">
+  <li><a href="#sec-hardware" id="toc-sec-hardware" class="nav-link" data-scroll-target="#sec-hardware">Hardware</a></li>
+  <li><a href="#sec-compiler" id="toc-sec-compiler" class="nav-link" data-scroll-target="#sec-compiler">Compiler</a></li>
+  <li><a href="#sec-ode-solver-tolerances" id="toc-sec-ode-solver-tolerances" class="nav-link" data-scroll-target="#sec-ode-solver-tolerances">ODE solver tolerances</a></li>
+  <li><a href="#sec-adjoint-ode-solver" id="toc-sec-adjoint-ode-solver" class="nav-link" data-scroll-target="#sec-adjoint-ode-solver">Adjoint ODE solver</a></li>
+  <li><a href="#sec-algebra-solver" id="toc-sec-algebra-solver" class="nav-link" data-scroll-target="#sec-algebra-solver">Algebra solver</a></li>
+  <li><a href="#sec-starting-concentraion-vector" id="toc-sec-starting-concentraion-vector" class="nav-link" data-scroll-target="#sec-starting-concentraion-vector">Starting concentration vector</a></li>
+  <li><a href="#sec-dae-system" id="toc-sec-dae-system" class="nav-link" data-scroll-target="#sec-dae-system">DAE system</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="intro.ipynb" download="intro.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="intro.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li><li><a href="intro.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></nav>
 </div>
 <main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Bayesian inference for realistic kinetic models of cell metabolism</h1>
-<p class="subtitle lead">What we want to do and why it is tricky</p>
+<h1 class="title">Bayesian inference for realistic thermokinetic models of cell metabolism</h1>
+<p class="subtitle lead">What we want to do and where we need help</p>
 </div>
 
 
@@ -107,7 +124,7 @@ div.csl-indent {
 
 </header>
 
-<p>This document explains how our group, Quantitative Modelling of Cell Metabolism, thinks about modelling networks of metabolic reactions.</p>
+<p>This document explains how our group, Quantitative Modelling of Cell Metabolism, thinks about modelling networks of metabolic reactions. It also explains where we think our approach could be improved and what kind of help we need in order to carry out these improvements.</p>
 <section id="our-modelling-approach" class="level1 page-columns page-full">
 <h1>Our modelling approach</h1>
 <p>Our aim is to synthesise information from the following sources:</p>
@@ -124,10 +141,10 @@ div.csl-indent {
 <li>A prior model describing what is known about the unobserved parameters.</li>
 </ul>
 <p>The rest of this section sets out how we flesh out these sub-models, starting with the generative model as it is by far the most interesting.</p>
-<section id="our-generative-model-sec-generative-mo" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="our-generative-model-sec-generative-mo">Our generative model {#sec-generative-mo</h2>
-<section id="thermokinetic-models-in-general" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="thermokinetic-models-in-general">Thermokinetic models in general</h3>
+<section id="sec-generative-model" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-generative-model">Our generative model</h2>
+<section id="sec-thermokinetic-models-in-general" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-thermokinetic-models-in-general">Thermokinetic models in general</h3>
 <div class="page-columns page-full"><p>A thermokinetic model describes the rates (usually referred to as ‘fluxes’) of the chemical reactions in a metabolic network parametrically, in terms of the concentrations of the network’s metabolites, some kinetic parameters describing the network’s reactions, some thermodynamic parameters and some parameters describing the network’s boundary conditions. <a href="#eq-thermokinetic-general">Equation&nbsp;1</a> therefore captures the general form of a thermokinetic model:<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup>&nbsp;In <a href="#eq-thermokinetic-general">Equation&nbsp;1</a>, the term <span class="math inline">\(x\)</span> represents a vector of metabolite concentrations, the term represent parameter vectors, and <span class="math inline">\(v\)</span> is a vector of real numbers, one per reaction</p></li></div></div>
 <p><span id="eq-thermokinetic-general"><span class="math display">\[
   v = f_v(x, \theta)
@@ -136,8 +153,8 @@ div.csl-indent {
 <p>Many thermokinetic models are possible, depending on how the modeller trades off detail against other factors such as computational feasibility, model identification and ease of curation.</p>
 <p>One thing that almost all thermokinetic models have in common is the assumption that the stoichiometric coefficient—that is, the number of molecules created or destroyed—of every metabolite in every reaction is known and collected in a stoichiometric matrix <span class="math inline">\(S\)</span> with a row for each metabolite and a column for each reaction.</p>
 </section>
-<section id="our-thermokinetic-model" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="our-thermokinetic-model">Our thermokinetic model</h3>
+<section id="sec-our-thermokinetic-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-our-thermokinetic-model">Our thermokinetic model</h3>
 <p>The thermokinetic model that we chose decomposes into factors as shown in <a href="#eq-flux-decomposition">Equation&nbsp;2</a>. The full model is presented here for completeness and to illustrate the general nature of the equations that we use, but the details can safely be skipped over.</p>
 <p><span id="eq-flux-decomposition"><span class="math display">\[
   f_v(x, \theta) = Enzyme \cdot k_{cat} \cdot Reversibility \cdot Saturation \cdot Allostery \cdot Phosphorylation
@@ -156,7 +173,7 @@ div.csl-indent {
 <p>Note that the thermodynamic effect on each reaction is derived from metabolite formation energies. This formulation is helpful because, provided that all reactions’ rates are calculated from the same formation energies, they are guaranteed to be thermodynamically consistent.</p>
 <p>The term <span class="math inline">\(Saturation\)</span> in equation <a href="#eq-flux-decomposition">Equation&nbsp;2</a> is a vector of non-negative real numbers representing, for each reaction, the fraction of enzyme that is saturated, i.e.&nbsp;bound to one of the reaction’s substrates. To describe saturation we use <a href="#eq-saturation">Equation&nbsp;4</a>, which is taken from <span class="citation" data-cites="liebermeisterModularRateLaws2010">Liebermeister, Uhlendorf, and Klipp (<a href="#ref-liebermeisterModularRateLaws2010" role="doc-biblioref">2010</a>)</span>.</p>
 <p><span id="eq-saturation"><span class="math display">\[
-\begin{align}
+\begin{aligned}
   Saturation_r &amp;= a \cdot \text{free enzyme ratio} \\
              a &amp;= \prod_{\text{s substrate}}\frac{x_s}{km_{rs}} \\
 \text{free enzyme ratio} &amp;= \begin{cases}
@@ -167,53 +184,51 @@ div.csl-indent {
                   + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}}
                   + \prod_{\text{p product}} (\frac{x_p}{km_{rp}})^{S_pr}  &amp; r\text{ reversible}
                   \end{cases}
-\end{align}
+\end{aligned}
 \tag{4}\]</span></span></p>
 <p>The term <span class="math inline">\(Allostery\)</span> in <a href="#eq-flux-decomposition">Equation&nbsp;2</a> is a vector of non-negative numbers describing the effect of allosteric regulation on each reaction. Allosteric regulation happens when binding to a certain molecule changes an enzyme’s shape in a way that changes its catalytic behaviour. We use <a href="#eq-allostery">Equation&nbsp;5</a>, originally from <span class="citation" data-cites="popovaGeneralizationModelMonod1975">Popova and Sel’kov (<a href="#ref-popovaGeneralizationModelMonod1975" role="doc-biblioref">1975</a>)</span>, to describe this phenomenon.</p>
 <p><span id="eq-allostery"><span class="math display">\[
-\begin{align}
-  Allostery_r &amp;= \frac{1}{1 + tc_r + (\text{free enzyme ratio}_r \cdot \frac{Qtense}{Qrelaxed})^{subunits}} \\
+\begin{aligned}
+  Allostery_r &amp;= \frac{1}{1 + tc_r \cdot (\text{free enzyme ratio}_r \cdot \frac{Qtense}{Qrelaxed})^{subunits}} \\
        Qtense &amp;= 1 + \sum_{\text{i inhibitor}} \frac{x_i}{dc_{ri}} \\
      Qrelaxed &amp;= 1 + \sum_{\text{a activator}} \frac{x_a}{dc_{ra}}
-\end{align}
+\end{aligned}
 \tag{5}\]</span></span></p>
 <p>Finally, the term <span class="math inline">\(Phosphorylation\)</span> in <a href="#eq-flux-decomposition">Equation&nbsp;2</a> captures an important effect whereby enzyme activity is altered due to a coupled process of phosphorylation and dephosphorylation.</p>
 <p><span id="eq-phosphorylation"><span class="math display">\[
-\begin{align}
+\begin{aligned}
 Phosphorylation_r &amp;= (\frac{\beta}{\alpha + \beta})^{subunits} \\
-          \alpha &amp;= \sum_{\text{p phosphoylator}} kcatp_p \cdot concp_p \\
-           \beta &amp;= \sum_{\text{p dephosphoylator}} kcatd_d \cdot concd_d \\
-\end{align}
+          \alpha &amp;= \sum_{\text{p phosphoylator}} kcat_{p} \cdot concp_p \\
+           \beta &amp;= \sum_{\text{p dephosphoylator}} kcat_{d} \cdot concd_d \\
+\end{aligned}
 \tag{6}\]</span></span></p>
 </section>
-<section id="steady-state-assumption" class="level3">
-<h3 class="anchored" data-anchor-id="steady-state-assumption">Steady state assumption</h3>
+<section id="sec-" class="level3">
+<h3 class="anchored" data-anchor-id="sec-">Steady state assumption</h3>
 <p>As well as assuming that the fluxes in our metabolic network will behave as our thermokinetic model expects, we also assume that the system was measured in a steady state, so that every non-boundary metabolite’s concentration was not changing. This assumption is represented mathematically in <a href="#eq-steady">Equation&nbsp;7</a>.</p>
 <p><span id="eq-steady"><span class="math display">\[
 S\cdot f_v(x, \theta) = 0
 \tag{7}\]</span></span></p>
 <p>The steady state assumption removes degrees of freedom equal to the rank of <span class="math inline">\(S\)</span> from our model, so that <span class="math inline">\(v\)</span> is constrained to lie in the right null space of S. Usually, given <span class="math inline">\(\theta\)</span> it is possible can solve <a href="#eq-steady">Equation&nbsp;7</a> to find a steady state metabolite concentration <span class="math inline">\(x_{steady}\)</span>.</p>
 </section>
-<section id="our-full-generative-model" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="our-full-generative-model">Our full generative model</h3>
-<div class="page-columns page-full"><p>Our full generative model starts with a parameter vector <span class="math inline">\(\theta\)</span>. It then calculates the steady state metabolite concentration vector <span class="math inline">\(x_{steady}\)</span> by solving <span class="math inline">\(@eq-steady\)</span>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> Metabolite concentrations are now available and can be compared with measurements. To find flux values to compare with measurements we simply calculate <span class="math inline">\(v_{steady}=f_v(x_{steady}, \theta)\)</span>.</p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;Note that in practice we do not solve <a href="#eq-steady">Equation&nbsp;7</a> directly but instead use ODE simulation - see section <a href="#sec-solving-the-steady-state-problem">Section&nbsp;1.4.2</a> for details</p></li></div></div>
+<section id="sec-our-full-generative-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="sec-our-full-generative-model">Our full generative model</h3>
+<div class="page-columns page-full"><p>Our full generative model starts with a parameter vector <span class="math inline">\(\theta\)</span>. It then calculates the steady state metabolite concentration vector <span class="math inline">\(x_steady\)</span> by solving <span class="math inline">\(@eq-steady\)</span>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> Metabolite concentrations are now available and can be compared with measurements. To find flux values to compare with measurements we simply calculate <span class="math inline">\(v_{steady}=f_v(x_{steady}, \theta)\)</span>.</p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;Note that in practice we do not solve <a href="#eq-steady">Equation&nbsp;7</a> directly but instead use ODE simulation - see section <a href="#sec-solving-the-steady-state-problem">Section&nbsp;1.4.3</a> for details</p></li></div></div>
 </section>
 </section>
 <section id="sec-measurement-model" class="level2">
 <h2 class="anchored" data-anchor-id="sec-measurement-model">Measurement model</h2>
 <p>For measurements of metabolite and enzyme concentrations we use independent lognormal regression models:</p>
 <p><span id="eq-conc-measurement-model"><span class="math display">\[
-\begin{align}
+\begin{aligned}
   y_{x} &amp;\sim LN(\ln(x_{steady}), \sigma_x) \\
   y_{enzyme} &amp;\sim LN(\ln(Enzyme), \sigma_{enzyme})
-\end{align}
+\end{aligned}
 \tag{8}\]</span></span></p>
 <p>For measurements of steady state fluxes we use independent linear regression models:</p>
-<p><span id="eq-conc-measurement-model"><span class="math display">\[
-\begin{equation}
+<p><span class="math display">\[\begin{equation}
   y_{v} \sim N(f_v(x_{steady}, \theta), \sigma_v)
-\end{equation}
-\tag{9}\]</span></span></p>
+\end{equation}\]</span>{#eq-conc-measurement-model}</p>
 <p>We ensure that flux measurements correspond to the flux modes of the measured network, so that the same pathway is never measured twice. See chapter 10 of <span class="citation" data-cites="palssonSystemsBiologyConstraintbased2015">Palsson (<a href="#ref-palssonSystemsBiologyConstraintbased2015" role="doc-biblioref">2015</a>)</span>, entitled “the left null space” for a discussion of this issue.</p>
 <p>We assume that the measurement errors <span class="math inline">\(\sigma_x\)</span>, <span class="math inline">\(\sigma_{enzyme}\)</span> and <span class="math inline">\(\sigma_v\)</span> are known for each measurement.</p>
 <p>These measurements <span class="math inline">\(y_x\)</span> and <span class="math inline">\(y_{enzyme}\)</span> are typically derived from quantitative metabolomics and proteomics experiments. Our choice of measurement model for these measurements is imperfect in at least these ways:</p>
@@ -231,21 +246,106 @@ S\cdot f_v(x, \theta) = 0
 </section>
 <section id="sec-implementation" class="level2">
 <h2 class="anchored" data-anchor-id="sec-implementation">Implementation</h2>
+<p>Full details of how we implement Bayesian thermokinetic modelling can be found in our software package <a href="https://github.com/biosustain/Maud">Maud</a>.</p>
+<section id="sec-input-specification" class="level3">
+<h3 class="anchored" data-anchor-id="sec-input-specification">Input specification</h3>
+<p>The required input for our Bayesian thermokinetic model is as follows:</p>
+<ul>
+<li>A qualititative specification of the thermokinetic model, including reaction stoichiometries, enzyme and compartment mappings and regulations.</li>
+<li>Records of experiments including measurements (and their errors) and enzyme knockouts.</li>
+<li>Information about parameters including priors and initial values. In future it will also be possible to fix a parameter’s value.</li>
+<li>Configuration including MCMC hyperparameters, solver tolerances and units.</li>
+</ul>
+<p>We created a custom format with which these things can be specified in <a href="https://toml.io/en/">toml</a> files. Maud can read these files, perform validation and represent them as Python objects.</p>
+</section>
 <section id="sec-posterior-sampling" class="level3">
 <h3 class="anchored" data-anchor-id="sec-posterior-sampling">Posterior sampling</h3>
+<p>We carry out Bayesian inference by posterior sampling using adaptive Hamiltonian Monte Carlo as provided by <a href="https://mc-stan.org/">Stan</a>.</p>
+<p>To our knowledge this is the only viable approach. Realistic models have too many parameters for many Bayesian computation approaches, including rejection sampling, ABC, Metropolis-Hastings and Gibbs sampling, while a similar study <span class="citation" data-cites="st.johnBayesianInferenceMetabolic2018">St. John et al. (<a href="#ref-st.johnBayesianInferenceMetabolic2018" role="doc-biblioref">2018</a>)</span> indicates that variational inference is unlikely to provide satisfactory approximations in this case.</p>
+<p>We believe that the non-linear, multi-parameter equations shown in <a href="#sec-our-thermokinetic-model">Section&nbsp;1.1.2</a> create particular problems for MCMC sampling because they induce complex correlations in the posterior distribution. Consequently, although adaptive Hamiltonian Monte Carlo makes Bayesian inference for realistic thermokinetic models possible, many leapfrog steps are typically required per sample, as the sampler must traverse the posterior distribution in small steps in order to avoid discretisation errors.</p>
 </section>
 <section id="sec-solving-the-steady-state-problem" class="level3">
 <h3 class="anchored" data-anchor-id="sec-solving-the-steady-state-problem">Solving the steady state problem</h3>
+<p>As mentioned in <a href="#sec-our-full-generative-model">Section&nbsp;1.1.4</a>, in our generative model steady state metabolite concentrations are calculated from parameter values by solving the steady state equation <a href="#eq-steady">Equation&nbsp;7</a>. Since adaptive Hamiltonian Monte Carlo requires gradients of the posterior distribution, it is also necessary to calculate sensitivities of the steady state problem solution with respect to all parameters.</p>
+<p>Our approach to this problem is to choose a starting concentration vector <span class="math inline">\(x_{0}\)</span> and a simulation time <span class="math inline">\(t\)</span>, then find <span class="math inline">\(x_t\)</span> using numerical ODE integration. To verify whether <span class="math inline">\(x_t\)</span> is a steady state we then evaluate <span class="math inline">\(S\cdot f_v(x_t, \theta)\)</span> and check if the result is sufficiently close to zero.</p>
+<p>Stan provides an interface to the Sundials ODE solver CVODES, including gradient calculations.</p>
+<p>For the systems we have investigated, this method works better than solving the steady state problem using an algebra solver.</p>
 </section>
-<section id="sec-software" class="level3 unnumbered">
+<section id="sec-analysis-of-results" class="level3">
+<h3 class="anchored" data-anchor-id="sec-analysis-of-results">Analysis of results</h3>
+<p>After sampling is complete, Maud uses the Bayesian analysis library <a href="https://python.arviz.org/en/0.14.0/index.html">arviz</a> to transform the results into an <a href="https://python.arviz.org/en/0.14.0/api/inference_data.html">InferenceData</a> object and save it as a json file, along with a range of files containing debug information. These files can be used to validate the computation and to draw conclusions about the measured system.</p>
+</section>
+</section>
+</section>
+<section id="our-problems" class="level1 page-columns page-full">
+<h1>Our problems</h1>
+<p>There are several features we would like to add to Maud in order to model new phenomena, including promiscuous enzymes, varying compartment volumes and different enzyme mechanisms. In addition, as mentioned above our measurement models are somewhat unrealistic and should ideally be replaced with models that more accurately reflect the information contained in a multi-omics analysis, particularly in the case of data from 13C labelling experiments. There are also new features that would make the modelling process easier, including fixing arbitrary parameters values, automatically loading input data and adding more validation. We are pretty confident that we can incrementally add all these features within the current framework.</p>
+<p>However our biggest problems require more fundamental changes: we would like to fit larger networks faster, and we would like to guarantee that our models appropriately respect known conservation relationships.</p>
+<section id="sec-problem-1-speed" class="level2">
+<h2 class="anchored" data-anchor-id="sec-problem-1-speed">Problem 1: speed</h2>
+<p>Due to speed constraints, the ballpark range for the largest systems we can practically model is around 15 reactions and state variables: see <a href="https://github.com/biosustain/Maud/tree/master/src/maud/data/example_inputs/methionine">the example maud input for the methionine cycle</a> for an illustration. This is large enough that Maud can describe some non-trivial metabolic networks, but relatively small improvements would dramatically expand the range of applicability. To illustrate, it is possible to describe the important subsystem comprising glycolysis and pentose phosphate pathway in <em>E. coli</em> using about 20 reactions, and <a href="http://bigg.ucsd.edu/models/e_coli_core"><code>e_coli_core</code></a>, the smallest model in the UCSD BIGG database, has 95 reactions.</p>
+<p>The main thing that limits Maud’s speed is the need to solve the steady state problem many times. To illustrate, a typical run with 2000 iterations, each with 500 gradient evaluations requires the steady state problem to be solved 1000000 times.</p>
+</section>
+<section id="sec-problem-2-conservation-relationships" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-problem-2-conservation-relationships">Problem 2: conservation relationships</h2>
+<p>Conservation relationships exist when a network conserves the total abundance of a combination of metabolites. For example, central carbon metabolism does not change the total amount of the metabolites ATP, AMP and ADP, but only changes the distribution of the total pool among these three forms. In general any concentration vector <span class="math inline">\(x\)</span> must satsify a set of mass conservation equations</p>
+<p><span class="math display">\[\begin{equation}
+L\cdot vol(x) = a
+\end{equation}\]</span>{#eq-conservation}</p>
+<div class="page-columns page-full"><p>where <span class="math inline">\(L\)</span> is the left null space of the stoichiometric matrix (i.e.&nbsp;a matrix satisfying <span class="math inline">\(L\cdot S = 0\)</span>), <span class="math inline">\(vol\)</span> is a function that translates concentrations into abundances and <span class="math inline">\(a\)</span> is a vector of pool abundances.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn4"><p><sup>4</sup>&nbsp;See chapter 10 (‘The Left Null Space of S’) of <span class="citation" data-cites="palssonSystemsBiologyConstraintbased2015">Palsson (<a href="#ref-palssonSystemsBiologyConstraintbased2015" role="doc-biblioref">2015</a>)</span> for further discussion.</p></li></div></div>
+<div class="page-columns page-full"><p>The practical importance of conservation relationships for our problem is that, in our current implementation, the vector <span class="math inline">\(a\)</span> is fixed by the starting metabolite concentration, which is effectively hard-coded<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. If it is inappropriate—for example if due to insufficient total ATP, AMP and ADP a reaction cannot flow in the correct direction—there is no way for the model to correct for this. We therefore think there are cases where our implementation prevents a steady state from being found even though one exists.</p><div class="no-row-height column-margin column-container"><li id="fn5"><p><sup>5</sup>&nbsp;To be precise the starting concentration for each metabolite is set before sampling as either the measured value if available or a default value</p></li></div></div>
+</section>
+</section>
+<section id="sec-potential-solutions" class="level1">
+<h1>Potential solutions</h1>
+<section id="sec-hardware" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hardware">Hardware</h2>
+<p>We have not been able to improve Maud’s performance dramatically by using high performance computers or by exploiting parallelism as the key bottlenecks—it is difficult to ensure steady state solving.</p>
+</section>
+<section id="sec-compiler" class="level2">
+<h2 class="anchored" data-anchor-id="sec-compiler">Compiler</h2>
+<p>Another possibility is to explore compiler optimisations as described <a href="https://blog.mc-stan.org/2022/08/03/options-for-improving-stan-sampling-speed/">here</a>. We have not had much success, though there is definitely room for further optimisation in this area.</p>
+</section>
+<section id="sec-ode-solver-tolerances" class="level2">
+<h2 class="anchored" data-anchor-id="sec-ode-solver-tolerances">ODE solver tolerances</h2>
+<p>There is a dramatic change in speed depending on the chosen ODE solver tolerances. We have not been able to find a systematic way to choose these, so we let the user configure these per run.</p>
+</section>
+<section id="sec-adjoint-ode-solver" class="level2">
+<h2 class="anchored" data-anchor-id="sec-adjoint-ode-solver">Adjoint ODE solver</h2>
+<p>Stan provides an interface to <a href="https://mc-stan.org/docs/2_31/stan-users-guide/adjoint-ode.html">the CVODE bdf solver with gradients calculated using adjoint sensitivity analysis</a> (the default approach, which we use, instead calculates gradients by solving an augmented ODE system). We expected using this solver to lead to improved speed and tried to use it when it was released, but we were not able to achieve large improvements, and reliability was worse.</p>
+</section>
+<section id="sec-algebra-solver" class="level2">
+<h2 class="anchored" data-anchor-id="sec-algebra-solver">Algebra solver</h2>
+<p>It is possible in principle to solve the steady state problem using an algebra solver rather than via our forward simulation method. We have not been able to make this approach work reliably as the available solvers require a good starting guess.</p>
+</section>
+<section id="sec-starting-concentraion-vector" class="level2">
+<h2 class="anchored" data-anchor-id="sec-starting-concentraion-vector">Starting concentration vector</h2>
+<p>A clear problem with our approach to solving the steady state problem is that we use a bad starting metabolite concentration vector. There are several potential speed improvements from choosing the starting concentration with escalating potential for improvement (and difficulty):</p>
+<ol type="1">
+<li>Find a better starting concentration vector before beginning MCMC and use the better starting concentration vector the same way we use our current one.</li>
+<li>Use the warmup MCMC iterations to improve the starting concentration vector, then use the improved vector for the sampling iterations.</li>
+<li>Choose a new starting vector every MCMC iteration or every few iterations.</li>
+<li>Choose a new starting concentration vector programmatically on each gradient evaluation based on current parameter values.</li>
+<li>Choose a new starting concentration vector on each gradient evaluation based on the result of the previous gradient evaluation.</li>
+</ol>
+<p>Option 1 could be achieved simply by substituting the code that chooses the starting concentration for a better alternative.</p>
+<p>Options 2 and 3 require running Stan multiple times with custom starting conditions. This isn’t a huge challenge.</p>
+<p>Option 4 is easy in principle as it only requires writing some Stan code. However we don’t know how to use the current parameter values to find a good starting concentration.</p>
+<p>Option 5 is difficult as it requires re-writing Stan’s underlying C++ code.</p>
+</section>
+<section id="sec-dae-system" class="level2">
+<h2 class="anchored" data-anchor-id="sec-dae-system">DAE system</h2>
+<p>We think the correct way to take into account conservation relationsips is to cast the steady state problem as a differential algebraic equation system.</p>
+<p>Stan provides an <a href="https://mc-stan.org/docs/functions-reference/functions-dae-solver.html">interface to the Sundials IDAS DAE solver</a>.</p>
+</section>
+</section>
+<section id="references" class="level1 unnumbered">
 
 
 </section>
-</section>
-</section>
 
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">Software</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-beberEQuilibratorPlatformEstimation2021" class="csl-entry" role="listitem">
 Beber, Moritz E., Mattia G. Gollub, Dana Mozaffari, Kevin M. Shebek, and Elad Noor. 2021. <span>“<span class="nocase">eQuilibrator</span> 3.0 – a Platform for the Estimation of Thermodynamic Constants.”</span> <em>arXiv:2103.00621 [q-Bio]</em>, February. <a href="http://arxiv.org/abs/2103.00621">http://arxiv.org/abs/2103.00621</a>.
 </div>
@@ -263,6 +363,9 @@ Palsson, Bernhard Ø. 2015. <em>Systems <span>Biology</span>: <span class="nocas
 </div>
 <div id="ref-popovaGeneralizationModelMonod1975" class="csl-entry" role="listitem">
 Popova, S. V., and E. E. Sel’kov. 1975. <span>“Generalization of the Model by Monod, Wyman and Changeux for the Case of a Reversible Monosubstrate Reaction.”</span> <em>FEBS Letters</em> 53 (3): 269–73. <a href="https://doi.org/10.1016/0014-5793(75)80034-2">https://doi.org/10.1016/0014-5793(75)80034-2</a>.
+</div>
+<div id="ref-st.johnBayesianInferenceMetabolic2018" class="csl-entry" role="listitem">
+St. John, Peter, Jonathan Strutz, Linda J Broadbelt, Keith E J Tyo, and Yannick J Bomble. 2018. <span>“Bayesian Inference of Metabolic Kinetics from Genome-Scale Multiomics Data.”</span> <em>bioRxiv</em>, October. <a href="https://doi.org/10.1101/450163">https://doi.org/10.1101/450163</a>.
 </div>
 </div></section></div></main>
 <!-- /main column -->
