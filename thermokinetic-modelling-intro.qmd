@@ -132,12 +132,12 @@ $$
   Saturation_r &= a \cdot \text{free enzyme ratio} \\
              a &= \prod_{\text{s substrate}}\frac{x_s}{km_{rs}} \\
 \text{free enzyme ratio} &= \begin{cases} 
-                  \prod_{\text{s sustrate}} (\frac{x_s}{km_{rs}})^{S_sr} 
+                  \prod_{\text{s sustrate}} (1 + \frac{x_s}{km_{rs}})^{S_sr} 
                   + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}} & r\text{ irreversible} \\
                   -1 
-                  + \prod_{\text{s sustrate}} (\frac{x_s}{km_{rs}})^{S_sr} 
+                  + \prod_{\text{s sustrate}} (1 + \frac{x_s}{km_{rs}})^{S_sr} 
                   + \sum_{\text{c inhibitor}}\frac{x_c}{ki_{rc}}
-                  + \prod_{\text{p product}} (\frac{x_p}{km_{rp}})^{S_pr}  & r\text{ reversible}
+                  + \prod_{\text{p product}} (1 + \frac{x_p}{km_{rp}})^{S_pr}  & r\text{ reversible}
                   \end{cases}
 \end{aligned}
 $${#eq-saturation}
