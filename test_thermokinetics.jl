@@ -2,7 +2,7 @@ include("./thermokinetics.jl")
 using .Thermokinetics
 using DifferentialEquations
 
-example_starting_concentration = [0.1, 0.4, 1.2, 0.1]
+example_starting_concentration = [0.4, 1.2]
 example_S = Matrix(
   [-1.  0.  0.;
     1. -1.  0.;
@@ -11,6 +11,7 @@ example_S = Matrix(
 )
 example_unknowns = OdeUnknowns(
   enzyme=[0.5, 0.5, 0.5],
+  conc_unbalanced=[2., 1.],
   kcat=[12., 1., 5.],
   dgf=[25., 25., 50., 50.],
   km=[1., 1., 1., 1., 1., 1.],
@@ -20,6 +21,7 @@ example_unknowns = OdeUnknowns(
 )
 example_ode_info = OdeInfo(
   S=example_S,
+  ix_balanced=[2, 3],
   subunits=[1, 2, 1],
   sp_to_km=[Dict(1=>1, 2=>2), Dict(2=>3, 3=>4), Dict(3=>5, 4=>6)],
   sp_to_ki=[Dict([]), Dict(2=>1), Dict([])],
@@ -29,7 +31,7 @@ example_ode_info = OdeInfo(
   unknowns=example_unknowns
 )
 
-example_Sv = Sv([1., 2., 3., 4.], example_ode_info, 0.1)
+example_Sv = Sv([1., 2.], example_ode_info, 0.1)
 print(example_Sv)
 
 tspan = (0., 20.)
