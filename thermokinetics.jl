@@ -1,6 +1,5 @@
 "Functions for calculating fluxes and species dynamics in thermokinetic models."
 module Thermokinetics
-using InvertedIndices
 
 export OdeUnknowns,
        OdeInfo,
@@ -12,6 +11,7 @@ export OdeUnknowns,
        get_flux,
        Sv
 
+using InvertedIndices
 using LinearAlgebra
 import Base.@kwdef
 
