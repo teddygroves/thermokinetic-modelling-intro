@@ -52,7 +52,6 @@ function get_flux(conc_balanced::Vector, ode_info::OdeInfo)
   conc = zeros(size(ode_info.S)[1])
   conc[ode_info.ix_balanced] = conc_balanced
   conc[InvertedIndex(ode_info.ix_balanced)] = ode_info.unknowns.conc_unbalanced
-  print(conc)
   return [
     get_reaction_flux(
       conc,
